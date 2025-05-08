@@ -45,6 +45,7 @@ export function derived(fn) {
 		ctx: component_context,
 		deps: null,
 		effects: null,
+		child_deriveds: null,
 		equals,
 		f: flags,
 		fn,
@@ -57,6 +58,11 @@ export function derived(fn) {
 
 	if (DEV && tracing_mode_flag) {
 		signal.created = get_stack('CreatedAt');
+	}
+
+	if (parent_derived) {
+		parent_derived.child_deriveds ||= []
+		parent_derived.child_deriveds.push(signal)
 	}
 
 	return signal;
@@ -100,6 +106,13 @@ export function destroy_derived_effects(derived) {
 
 		for (var i = 0; i < effects.length; i += 1) {
 			destroy_effect(/** @type {Effect} */ (effects[i]));
+		}
+	}
+
+	// Recursivly look for child-deriveds and destroy effects inside of them.
+	if (derived.child_deriveds !== null) {
+		for (var i = 0; i < derived.child_deriveds.length; i += 1) {
+			destroy_derived_effects(derived.child_deriveds[i]);
 		}
 	}
 }

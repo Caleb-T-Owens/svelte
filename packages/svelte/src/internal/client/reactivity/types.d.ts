@@ -38,6 +38,8 @@ export interface Derived<V = unknown> extends Value<V>, Reaction {
 	fn: () => V;
 	/** Effects created inside this signal */
 	effects: null | Effect[];
+	/** Deriveds created inside this signal */
+	child_deriveds: null | Derived[];
 	/** Parent effect or derived */
 	parent: Effect | Derived | null;
 }
